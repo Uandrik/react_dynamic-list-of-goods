@@ -9,13 +9,20 @@ import { Good } from './types/Good';
 
 export const App: React.FC = () => {
   const [list, setList] = useState<Good[]>([]);
+  const [errorMessage, setErrorMesage] = useState<string | null>(null);
+
+  const handleLoad = (downloader: () => Promise<Good[]>) => {
+    downloader()
+      .then(setList)
+      .catch(() => setErrorMesage('Failed to load list. Try again later'));
+  };
 
   return (
     <div className="App">
       <h1>Dynamic list of Goods</h1>
 
       <button
-        onClick={() => getAll().then(users => setList(users))}
+        onClick={() => handleLoad(getAll)}
         type="button"
         data-cy="all-button"
       >
@@ -23,7 +30,7 @@ export const App: React.FC = () => {
       </button>
 
       <button
-        onClick={() => get5First().then(users => setList(users))}
+        onClick={() => handleLoad(get5First)}
         type="button"
         data-cy="first-five-button"
       >
@@ -31,12 +38,14 @@ export const App: React.FC = () => {
       </button>
 
       <button
-        onClick={() => getRedGoods().then(users => setList(users))}
+        onClick={() => handleLoad(getRedGoods)}
         type="button"
         data-cy="red-button"
       >
         Load red goods
       </button>
+
+      {errorMessage && <p> {errorMessage} </p>}
 
       <GoodsList goods={list} />
     </div>
